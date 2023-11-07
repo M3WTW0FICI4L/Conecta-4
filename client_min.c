@@ -1,10 +1,10 @@
-/* Inclusio de fitxers .h habituals */
+/* Inclusión de archivos .h habituales */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
-/* Inclusio de fitxers .h per als sockets */
+/* Inclusión de archivos .h para los sockets */
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -12,55 +12,55 @@
 #include <unistd.h>
 
 #define BUFFER_LEN 1024
+#define COLUMNES 6
+#define FILES 6
 
 int main(int argc, char **argv) {
     if (argc != 2) {
-        printf("Us: %s IP\n", argv[0]);
+        printf("Uso: %s IP\n", argv[0]);
         exit(0);
     }
-    
-    int s; /* Per treballar amb el socket */
+
+    int s;  /* Para trabajar con el socket */
     struct sockaddr_in adr;
     char buffer[BUFFER_LEN];
+    int n;
     int columna;
     bool fi = false;
-    
+
+    // No es necesario mantener el tablero local en el cliente
+
     while (!fi) {
-        /* Volem socket d'internet i no orientat a la connexio */
+        /* Queremos un socket de Internet y no orientado a la conexión */
         s = socket(AF_INET, SOCK_DGRAM, 0);
-        
+
         adr.sin_family = AF_INET;
-        // htons ens converteix el integer a format de xarxa
         adr.sin_port = htons(44444);
-        
-        /* L'adreca de comunicacio sera la IP del servidor, es a dir el parametre */
         adr.sin_addr.s_addr = inet_addr(argv[1]);
-        
-        // Llegir dades
-        printf("En quina columna vols tirar? ");
+
+        // Leer y enviar la columna elegida
+        printf("En qué columna quieres tirar? ");
         scanf("%d", &columna);
-        
+
         if (columna < 0 || columna >= COLUMNES) {
-            printf("Introdueix un nombre entre 0 i %d\n", COLUMNES - 1);
-            close(s); // Cerrar el socket en caso de entrada invalida
+            printf("Introduce un número entre 0 y %d\n", COLUMNES - 1);
+            close(s);
             continue;
         }
-        
-        // Convertir int to array char
-        snprintf(buffer, BUFFER_LEN, "%d", columna);
-        
-        // Enviar dades
-        sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&adr, sizeof(adr));
-        printf("Paquet enviat! -> %s\n", buffer);
-        
-        // Esperar resposta
-        printf("Esperant resultat del servidor!\n");
+
+        // Convertir int a cadena y enviar
+        sprintf(buffer, "%d", columna);
+        sendto(s, buffer, BUFFER_LEN, 0, (struct sockaddr*)&adr, sizeof(adr));
+        printf("Paquete enviado! -> %s\n", buffer);
+
+        // Esperar respuesta (estado del tablero)
+        printf("Esperando resultado del servidor...\n");
         recvfrom(s, buffer, BUFFER_LEN, 0, NULL, NULL);
-        
-        // Escriure resposta
+
+        // Mostrar el estado del tablero
         printf("%s\n", buffer);
-        
-        /* Tanquem el socket */
+
+        /* Cerrar el socket */
         close(s);
     }
     return 0;
