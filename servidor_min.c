@@ -84,23 +84,6 @@ int main() {
                     fichas[columna] = fichas[columna] + 1;
                 }
 	        }
-            
-            // Envía el estado actual del tablero al cliente
-            fila = FILES;  // Empezamos desde la última fila
-            sprintf(buffer, "Jugada Jugador1:\n");
-            while (fila >= 0) {
-                int columna = 0;
-                while (columna < COLUMNES) {
-                    // Agregamos el carácter de la casilla al búfer
-                    sprintf(buffer + strlen(buffer), "|%c|", tablero[fila][columna]);
-                    columna = columna + 1;
-                }
-                sprintf(buffer + strlen(buffer), "\n");
-                fila = fila - 1;
-            }
-
-            // Enviamos el estado del tablero al cliente
-            sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
 
             // Jugador 2
             // Semilla para la generación de números aleatorios basada en el tiempo actual
