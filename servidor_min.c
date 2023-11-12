@@ -28,7 +28,6 @@ int main() {
     char tablero[FILES][COLUMNES];
     bool jugada = false;
     bool fi = false;
-    char jugador;
 
     columna = 0;
     fila = FILES;
@@ -50,7 +49,7 @@ int main() {
         printf("Servidor operativo!\n\n");
 
         // Generamos una tabla vacía
-        while (fila >= 0) {
+        while (fila > 0) {
             int columna = 0;
             while (columna < COLUMNES) {
                 tablero[fila][columna] = '_';
@@ -62,100 +61,45 @@ int main() {
 	}
 
     while (1) {
-        // Recibimos solicitud
-        mida = sizeof(client_adr);
-        n = recvfrom(s, buffer, MIDA_BUFFER, 0, (struct sockaddr *)&client_adr, &mida);
-        if (n < 0) {
-            perror("Error al recibir datos\n");
-            continue;
-        }
-        sscanf(buffer, "%d", &columna);
-        printf("Paquete recibido %s (columna %d)\n", buffer, columna);
+            // Recibimos solicitud
+            mida = sizeof(client_adr);
+            n = recvfrom(s, buffer, MIDA_BUFFER, 0, (struct sockaddr *)&client_adr, &mida);
+            if (n < 0) {
+                perror("Error al recibir datos\n");
+                continue;
+            }
+            sscanf(buffer, "%d", &columna);
+            printf("Paquete recibido %s (columna %d)\n", buffer, columna);
 
-        jugador = tablero[fila][columna];
+            // Jugador 1
+            while (jugada == false)
+            {
+                if (columna < 0 || columna > COLUMNES) {
+                    snprintf(buffer, MIDA_BUFFER, "Introduce un número entre 0 y %d\n", COLUMNES - 1);
+                    sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
+                } else {
+                    if (fichas[columna] > FILES) {
+                        snprintf(buffer, MIDA_BUFFER, "Esta columna está completa\n");
+                        sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
+                    } else {
+                        tablero[fichas[columna]][columna] = 'X';
+                        fichas[columna]++;
+                        jugada = true;
+                    }
+                }
+            }
+            jugada = false;
 
-        // Jugador 1
-        if (columna < 0 || columna >= COLUMNES) {
-            snprintf(buffer, MIDA_BUFFER, "Introduce un número entre 0 y %d\n", COLUMNES - 1);
-            sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
-        } else {
-            if (fichas[columna] >= FILES) {
-                snprintf(buffer, MIDA_BUFFER, "Esta columna está completa\n");
-                sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
-            } else {
-                tablero[fichas[columna]][columna] = 'X';
-                fichas[columna] = fichas[columna] + 1;
+            columna = 0;
+            while (fichas [columna] == FILES){
+                columna++;
+                if (columna == COLUMNES) {
+                    snprintf(buffer, MIDA_BUFFER, "---GAME OVER---\nTABLERO LLENO");
+                    sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
+                    jugada = true;
+                } 
             }
-        }
-        
-        bool fi (char tablero[FILES][COLUMNES], int fila, int columna);
-        // Verificar horizontal
-        int contador = 0;
-        for (int i = 0; i < COLUMNES; ++i) {
-            if (tablero[fila][i] == jugador) {
-                contador++;
-                if (contador == 4) return true;
-            } else {
-                contador = 0;
-            }
-        }
-        // Verificar vertical
-        contador = 0;
-        for (int i = 0; i < FILES; ++i) {
-            if (tablero[i][columna] == jugador) {
-                contador++;
-                if (contador == 4) return true;
-            } else {
-                contador = 0;
-            }
-        }
-        // Verificar diagonal de izquierda a derecha (\)
-        contador = 0;
-        int inicioFila = fila - min(fila, columna);
-        int inicioColumna = columna - min(fila, columna);
-        for (int i = 0; i < min(FILES - inicioFila, COLUMNES - inicioColumna); ++i) {
-            if (tablero[inicioFila + i][inicioColumna + i] == jugador) {
-                contador++;
-                if (contador == 4) return true;
-            } else {
-            contador = 0;
-            }
-        }
-        // Verificar diagonal de derecha a izquierda (/)
-        contador = 0;
-        inicioFila = fila + min(FILES - fila - 1, columna);
-        inicioColumna = columna - min(FILES - fila - 1, columna);
-        for (int i = 0; i < min(inicioFila + 1, COLUMNES - inicioColumna); ++i) {
-            if (tablero[inicioFila - i][inicioColumna + i] == jugador) {
-                contador++;
-                if (contador == 4) return true;
-            } else {
-                contador = 0;
-            }
-        }
-        // Envía el estado actual del tablero al cliente
-        fila = FILES;  // Empezamos desde la última fila
-        sprintf(buffer, "\n");
-        while (fila >= 0) {
-            int columna = 0;
-            while (columna < COLUMNES) {
-                // Agregamos el carácter de la casilla al búfer
-                sprintf(buffer + strlen(buffer), "|%c|", tablero[fila][columna]);
-                columna = columna + 1;
-            }
-            // Agregamos una nueva línea al final de la fila
-            sprintf(buffer + strlen(buffer), "\n");
-            fila = fila - 1;
-        }
-        jugada = false;
-        // Enviamos respuesta
-        sendto(s, buffer, strlen(buffer) + 1, 1, (struct sockaddr *)&client_adr, mida);
-    
-        if (fi == true){
-            sprintf(buffer, "---GAME OVER---");
-            sprintf(buffer, "¡Jugador %c ha ganado!\n", jugador);
-        }
-        else {
+
             // Jugador 2
             // Semilla para la generación de números aleatorios basada en el tiempo actual
             srand(time(NULL));
@@ -164,89 +108,49 @@ int main() {
             j2 = rand() % 6;
 
             while (jugada == false) {
-                if (j2 < 0 || j2 >= COLUMNES) {
+                if (j2 < 0 || j2 > COLUMNES) {
                     snprintf(buffer, MIDA_BUFFER, "Generación de aleatorio defectuosa\n");
                     j2 = rand() % 6;
                 } else {
-                    if (fichas[j2] >= FILES) {
+                    if (fichas[j2] > FILES) {
                         snprintf(buffer, MIDA_BUFFER, "Esta columna está completa\n");
                         j2 = rand() % 6;
                     } else {
                         tablero[fichas[j2]][j2] = 'O';
-                        fichas[j2] = fichas[j2] + 1;
+                        fichas[j2]++;
                         jugada = true;
                     }
                 }
             }
-            bool fi (char tablero[FILES][COLUMNES], int fila, int columna);
+            jugada = false;
 
-            // Verificar horizontal
-            int contador = 0;
-            for (int i = 0; i < COLUMNES; ++i) {
-                if (tablero[fila][i] == jugador) {
-                    contador++;
-                    if (contador == 4) return true;
-                } else {
-                    contador = 0;
-                }
-            }
-            // Verificar vertical
-            contador = 0;
-            for (int i = 0; i < FILES; ++i) {
-                if (tablero[i][columna] == jugador) {
-                    contador++;
-                    if (contador == 4) return true;
-                } else {
-                    contador = 0;
-                }
-            }
-            // Verificar diagonal de izquierda a derecha (\)
-            contador = 0;
-            int inicioFila = fila - min(fila, columna);
-            int inicioColumna = columna - min(fila, columna);
-            for (int i = 0; i < min(FILES - inicioFila, COLUMNES - inicioColumna); ++i) {
-                if (tablero[inicioFila + i][inicioColumna + i] == jugador) {
-                    contador++;
-                    if (contador == 4) return true;
-                } else {
-                contador = 0;
-                }
-            }
-            // Verificar diagonal de derecha a izquierda (/)
-            contador = 0;
-            inicioFila = fila + min(FILES - fila - 1, columna);
-            inicioColumna = columna - min(FILES - fila - 1, columna);
-            for (int i = 0; i < min(inicioFila + 1, COLUMNES - inicioColumna); ++i) {
-                if (tablero[inicioFila - i][inicioColumna + i] == jugador) {
-                    contador++;
-                    if (contador == 4) return true;
-                } else {
-                    contador = 0;
-                }
-            }
             // Envía el estado actual del tablero al cliente
             fila = FILES;  // Empezamos desde la última fila
             sprintf(buffer, "\n");
-            while (fila >= 0) {
-                    int columna = 0;
-                    while (columna < COLUMNES) {
-                        // Agregamos el carácter de la casilla al búfer
-                        sprintf(buffer + strlen(buffer), "|%c|", tablero[fila][columna]);
-                        columna = columna + 1;
-                    }
-                    // Agregamos una nueva línea al final de la fila
-                    sprintf(buffer + strlen(buffer), "\n");
-                    fila = fila - 1;
+            while (fila > 0) {
+                int columna = 0;
+                while (columna < COLUMNES) {
+                    // Agregamos el carácter de la casilla al búfer
+                    sprintf(buffer + strlen(buffer), "|%c|", tablero[fila][columna]);
+                    columna = columna + 1;
                 }
-            jugada = false;
+                // Agregamos una nueva línea al final de la fila
+                sprintf(buffer + strlen(buffer), "\n");
+                fila = fila - 1;
+            }
 
             // Enviamos respuesta
-            sendto(s, buffer, strlen(buffer) + 1, 1, (struct sockaddr *)&client_adr, mida);
+            sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
+
+            columna = 0;
+            while (fichas [columna] == FILES){
+                columna++;
+                if (columna == COLUMNES - 1) {
+                    snprintf(buffer, MIDA_BUFFER, "---GAME OVER---\nTABLERO LLENO");
+                    sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
+                } 
             }
         }
-            sprintf(buffer, "---GAME OVER---");
-            sprintf(buffer, "¡Jugador %c ha ganado!\n", jugador);
-
     /* Cerramos el socket */
     close(s);
     return 0;
