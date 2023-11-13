@@ -61,7 +61,7 @@ int main()
         while (fila >= 0)
         {
             int columna = 0;
-            while (columna <= COLUMNES - 1)
+            while (columna < COLUMNES)
             {
                 tablero[fila][columna] = '_';
                 fichas[columna] = 0;
@@ -77,7 +77,7 @@ int main()
         {
             // Recibimos solicitud
             mida = sizeof(client_adr);
-            n = recvfrom(s, buffer, strlen(buffer), 0, (struct sockaddr *)&client_adr, &mida);
+            n = recvfrom(s, buffer, MIDA_BUFFER, 0, (struct sockaddr *)&client_adr, &mida);
             if (n < 0)
             {
                 perror("Error al recibir datos\n");
@@ -96,7 +96,7 @@ int main()
                 }
                 else
                 {
-                    if (fichas[columna] > FILES)
+                    if (fichas[columna] >= FILES)
                     {
                         snprintf(buffer, MIDA_BUFFER, "Esta columna está completa\n");
                         sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
@@ -127,7 +127,7 @@ int main()
                 }
                 else
                 {
-                    if (fichas[j2] > FILES)
+                    if (fichas[j2] >= FILES)
                     {
                         snprintf(buffer, MIDA_BUFFER, "Esta columna está completa\n");
                         j2 = rand() % 6;
@@ -155,6 +155,7 @@ int main()
         sprintf(buffer + strlen(buffer), "\n"); 
         fila = fila - 1;
     }
+            sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
 
             columna = 0;
             while (fichas[columna] >= FILES)
@@ -171,7 +172,7 @@ int main()
         {
             snprintf(buffer, MIDA_BUFFER, "ENVIA 0 PARA REINICIAR");
             mida = sizeof(client_adr);
-            n = recvfrom(s, buffer, strlen(buffer), 0, (struct sockaddr *)&client_adr, &mida);
+            n = recvfrom(s, buffer, MIDA_BUFFER, 0, (struct sockaddr *)&client_adr, &mida);
             if (n < 0)
             {
                 perror("Error al recibir datos\n");
@@ -187,7 +188,7 @@ int main()
                 while (fila >= 0)
                 {
                     int columna = 0;
-                    while (columna <= COLUMNES)
+                    while (columna < COLUMNES)
                     {
                         tablero[fila][columna] = '_';
                         fichas[columna] = 0;
