@@ -77,7 +77,7 @@ int main()
         {
             // Recibimos solicitud
             mida = sizeof(client_adr);
-            n = recvfrom(s, buffer, MIDA_BUFFER, 0, (struct sockaddr *)&client_adr, &mida);
+            n = recvfrom(s, buffer, strlen(buffer), 0, (struct sockaddr *)&client_adr, &mida);
             if (n < 0)
             {
                 perror("Error al recibir datos\n");
@@ -92,14 +92,14 @@ int main()
                 if (columna < 0 || columna > COLUMNES - 1)
                 {
                     snprintf(buffer, MIDA_BUFFER, "Introduce un número entre 0 y %d\n", COLUMNES - 1);
-                    sendto(s, buffer, MIDA_BUFFER + 1, 0, (struct sockaddr *)&client_adr, mida);
+                    sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
                 }
                 else
                 {
                     if (fichas[columna] > FILES)
                     {
                         snprintf(buffer, MIDA_BUFFER, "Esta columna está completa\n");
-                        sendto(s, buffer, MIDA_BUFFER + 1, 0, (struct sockaddr *)&client_adr, mida);
+                        sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
                     }
                     else
                     {
@@ -144,22 +144,20 @@ int main()
 
             // Envía el estado actual del tablero al cliente
             fila = FILES; // Empezamos desde la última fila
-            sprintf(buffer, MIDA_BUFFER, "\n");
+            sprintf(buffer, "\n");
             while (fila >= 0)
             {
                 int columna = 0;
                 while (columna <= COLUMNES)
                 {
                     // Agregamos el carácter de la casilla al búfer
-                    sprintf(buffer + MIDA_BUFFER, "|%c|", tablero[fila][columna]);
+                    sprintf(buffer + strlen(buffer), "|%c|", tablero[fila][columna]);
                     columna = columna + 1;
                 }
                 // Agregamos una nueva línea al final de la fila
-                sprintf(buffer + MIDA_BUFFER, "\n");
+                sprintf(buffer, "\n");
                 fila = fila - 1;
             }
-            // Enviamos respuesta
-            sendto(s, buffer, MIDA_BUFFER + 1, 0, (struct sockaddr *)&client_adr, mida);
 
             columna = 0;
             while (fichas[columna] >= FILES)
@@ -175,10 +173,8 @@ int main()
         else
         {
             snprintf(buffer, MIDA_BUFFER, "ENVIA 0 PARA REINICIAR");
-            sendto(s, buffer, MIDA_BUFFER + 1, 0, (struct sockaddr *)&client_adr, mida);
             mida = sizeof(client_adr);
-            n = recvfrom(s, buffer, MIDA_BUFFER, 0, (struct sockaddr *)&client_adr, &mida);
-
+            n = recvfrom(s, buffer, strlen(buffer), 0, (struct sockaddr *)&client_adr, &mida);
             if (n < 0)
             {
                 perror("Error al recibir datos\n");
@@ -205,7 +201,13 @@ int main()
                 fi = false;
             }
         }
+        // Enviamos respuesta
+        sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
     }
+    /* Cerramos el socket */
+    close(s);
+    return 0;
+}
     /* Cerramos el socket */
     close(s);
     return 0;
