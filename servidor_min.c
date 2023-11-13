@@ -144,20 +144,17 @@ int main()
 
             // Envía el estado actual del tablero al cliente
             fila = FILES; // Empezamos desde la última fila
-            sprintf(buffer, "\n");
-            while (fila >= 0)
-            {
-                int columna = 0;
-                while (columna <= COLUMNES)
-                {
-                    // Agregamos el carácter de la casilla al búfer
-                    sprintf(buffer + strlen(buffer), "|%c|", tablero[fila][columna]);
-                    columna = columna + 1;
-                }
-                // Agregamos una nueva línea al final de la fila
-                sprintf(buffer, "\n");
-                fila = fila - 1;
+    sprintf(buffer, "\n");
+    while (fila >= 0) {
+        int columna = 0;
+        while (columna < COLUMNES) {
+            sprintf(buffer + strlen(buffer), "|%c|", tablero[fila][columna]);
+            columna = columna + 1;
             }
+        // Agregamos una nueva línea al final de la fila
+        sprintf(buffer + strlen(buffer), "\n"); 
+        fila = fila - 1;
+    }
 
             columna = 0;
             while (fichas[columna] >= FILES)
