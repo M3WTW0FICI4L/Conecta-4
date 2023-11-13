@@ -25,9 +25,9 @@ int main(int argc, char **argv) {
     struct sockaddr_in adr;
     char buffer[BUFFER_LEN];
     int n;
-    int columna;
+    int columna = -1;
 
-    while (1) {
+    while (columna != 9) {
         /* Queremos un socket de Internet y no orientado a la conexión */
         s = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
         adr.sin_addr.s_addr = inet_addr(argv[1]);
 
         // Leer y enviar la columna elegida
-        printf("En qué columna quieres tirar? ");
+        printf("Elije una columna del 0 al 5, pulsa 9 para terminar\n");
         scanf("%d", &columna);
 
         // Convertir int a cadena y enviar
@@ -50,9 +50,9 @@ int main(int argc, char **argv) {
 
         // Mostrar el estado del tablero
         printf("%s\n", buffer);
-
-        /* Cerrar el socket */
-        close(s);
     }
+    /* Cerrar el socket */
+        close(s);
+    
     return 0;
 }
