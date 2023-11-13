@@ -65,14 +65,38 @@ int main()
             {
                 tablero[fila][columna] = '_';
                 fichas[columna] = 0;
-                columna = columna + 1;
+                columna++;
             }
             fila = fila - 1;
         }
+        int columna = 0;
+        while (columna < COLUMNES)
+            {
+                tablero[FILES][columna] = columna + '0';
+                columna++;
+            }
     }
 
-    while (1)
-    {
+    while (1) {columna = 0;
+        while (fichas[columna] >= FILES)
+        {
+            columna++;
+            if (columna >= COLUMNES - 1)
+            {
+                snprintf(buffer, MIDA_BUFFER, "---GAME OVER---\nTABLERO LLENO");
+                fi = true;
+            }
+        }
+        columna = 0;
+        while (fichas[columna] >= FILES)
+        {
+            columna++;
+            if (columna >= COLUMNES - 1)
+            {
+                snprintf(buffer, MIDA_BUFFER, "---GAME OVER---\nTABLERO LLENO");
+                fi = true;
+            }
+        }
         if (fi == false)
         {
             // Recibimos solicitud
@@ -87,8 +111,7 @@ int main()
             printf("Paquete recibido %s (columna %d)\n", buffer, columna);
 
             // Jugador 1
-            while (jugada == false)
-            {
+            while (jugada == false) {
                 if (columna < 0 || columna > COLUMNES - 1)
                 {
                     snprintf(buffer, MIDA_BUFFER, "Introduce un número entre 0 y %d\n", COLUMNES - 1);
@@ -144,33 +167,24 @@ int main()
 
             // Envía el estado actual del tablero al cliente
             fila = FILES; // Empezamos desde la última fila
-    sprintf(buffer, "\n");
-    while (fila >= 0) {
-        int columna = 0;
-        while (columna < COLUMNES) {
-            sprintf(buffer + strlen(buffer), "|%c|", tablero[fila][columna]);
-            columna = columna + 1;
-            }
-        // Agregamos una nueva línea al final de la fila
-        sprintf(buffer + strlen(buffer), "\n"); 
-        fila = fila - 1;
-    }
-            sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
-
-            columna = 0;
-            while (fichas[columna] >= FILES)
-            {
-                columna++;
-                if (columna >= COLUMNES - 1)
-                {
-                    snprintf(buffer, MIDA_BUFFER, "---GAME OVER---\nTABLERO LLENO");
-                    fi = true;
+            sprintf(buffer, "\n");
+            while (fila >= 0) {
+                int columna = 0;
+                while (columna < COLUMNES) {
+                    sprintf(buffer + strlen(buffer), "|%c|", tablero[fila][columna]);
+                    columna = columna + 1;
                 }
+                // Agregamos una nueva línea al final de la fila
+                sprintf(buffer + strlen(buffer), "\n"); 
+                fila = fila - 1;
             }
+            // Enviamos respuesta
+            sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
         }
         else
         {
             snprintf(buffer, MIDA_BUFFER, "ENVIA 0 PARA REINICIAR");
+            sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
             mida = sizeof(client_adr);
             n = recvfrom(s, buffer, MIDA_BUFFER, 0, (struct sockaddr *)&client_adr, &mida);
             if (n < 0)
@@ -199,13 +213,7 @@ int main()
                 fi = false;
             }
         }
-        // Enviamos respuesta
-        sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
     }
-    /* Cerramos el socket */
-    close(s);
-    return 0;
-}
     /* Cerramos el socket */
     close(s);
     return 0;
