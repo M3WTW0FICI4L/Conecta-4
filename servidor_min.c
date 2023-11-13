@@ -144,7 +144,7 @@ int main()
 
             // Envía el estado actual del tablero al cliente
             fila = FILES; // Empezamos desde la última fila
-            sprintf(buffer + MIDA_BUFFER, "\n");
+            sprintf(buffer, MIDA_BUFFER, "\n");
             while (fila >= 0)
             {
                 int columna = 0;
