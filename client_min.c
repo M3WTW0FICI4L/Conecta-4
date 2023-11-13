@@ -26,11 +26,8 @@ int main(int argc, char **argv) {
     char buffer[BUFFER_LEN];
     int n;
     int columna;
-    bool fi = false;
 
-    // No es necesario mantener el tablero local en el cliente
-
-    while (!fi) {
+    while (1) {
         /* Queremos un socket de Internet y no orientado a la conexión */
         s = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -41,12 +38,6 @@ int main(int argc, char **argv) {
         // Leer y enviar la columna elegida
         printf("En qué columna quieres tirar? ");
         scanf("%d", &columna);
-
-        if (columna < 0 || columna >= COLUMNES) {
-            printf("Introduce un número entre 0 y %d\n", COLUMNES - 1);
-            close(s);
-            continue;
-        }
 
         // Convertir int a cadena y enviar
         sprintf(buffer, "%d", columna);

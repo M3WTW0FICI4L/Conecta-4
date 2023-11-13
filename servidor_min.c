@@ -16,19 +16,25 @@
 #define FILES 6
 #define COLUMNES 6
 
-int main() {
+int main()
+{
     int s; /* Para trabajar con el socket */
     struct sockaddr_in serv_adr, client_adr;
     char buffer[MIDA_BUFFER];
     socklen_t mida;
+
     int n;
     int columna, fila;
     int fichas[COLUMNES];
     int j2;
+    int restart;
+
     char tablero[FILES][COLUMNES];
+
     bool jugada = false;
     bool fi = false;
 
+    restart = 1;
     columna = 0;
     fila = FILES;
 
@@ -42,29 +48,38 @@ int main() {
 
     /* Enlazamos el socket */
     n = bind(s, (struct sockaddr *)&serv_adr, sizeof(serv_adr));
-    if (n < 0) {
+    if (n < 0)
+    {
         printf("No se pudo enlazar el socket\n");
-    } else {
+    }
+    else
+    {
         /* ¡Servidor operativo! */
         printf("Servidor operativo!\n\n");
 
         // Generamos una tabla vacía
-        while (fila > 0) {
+        while (fila >= 0)
+        {
             int columna = 0;
-            while (columna < COLUMNES) {
+            while (columna <= COLUMNES - 1)
+            {
                 tablero[fila][columna] = '_';
-				fichas[columna]=0;
+                fichas[columna] = 0;
                 columna = columna + 1;
             }
             fila = fila - 1;
         }
-	}
+    }
 
-    while (1) {
+    while (1)
+    {
+        if (fi == false)
+        {
             // Recibimos solicitud
             mida = sizeof(client_adr);
             n = recvfrom(s, buffer, MIDA_BUFFER, 0, (struct sockaddr *)&client_adr, &mida);
-            if (n < 0) {
+            if (n < 0)
+            {
                 perror("Error al recibir datos\n");
                 continue;
             }
@@ -74,14 +89,20 @@ int main() {
             // Jugador 1
             while (jugada == false)
             {
-                if (columna < 0 || columna > COLUMNES) {
+                if (columna < 0 || columna > COLUMNES - 1)
+                {
                     snprintf(buffer, MIDA_BUFFER, "Introduce un número entre 0 y %d\n", COLUMNES - 1);
-                    sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
-                } else {
-                    if (fichas[columna] > FILES) {
+                    sendto(s, buffer, MIDA_BUFFER + 1, 0, (struct sockaddr *)&client_adr, mida);
+                }
+                else
+                {
+                    if (fichas[columna] > FILES)
+                    {
                         snprintf(buffer, MIDA_BUFFER, "Esta columna está completa\n");
-                        sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
-                    } else {
+                        sendto(s, buffer, MIDA_BUFFER + 1, 0, (struct sockaddr *)&client_adr, mida);
+                    }
+                    else
+                    {
                         tablero[fichas[columna]][columna] = 'X';
                         fichas[columna]++;
                         jugada = true;
@@ -90,16 +111,6 @@ int main() {
             }
             jugada = false;
 
-            columna = 0;
-            while (fichas [columna] == FILES){
-                columna++;
-                if (columna == COLUMNES) {
-                    snprintf(buffer, MIDA_BUFFER, "---GAME OVER---\nTABLERO LLENO");
-                    sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
-                    jugada = true;
-                } 
-            }
-
             // Jugador 2
             // Semilla para la generación de números aleatorios basada en el tiempo actual
             srand(time(NULL));
@@ -107,15 +118,22 @@ int main() {
             // Genera un número aleatorio entre 0 y 5 (ambos incluidos)
             j2 = rand() % 6;
 
-            while (jugada == false) {
-                if (j2 < 0 || j2 > COLUMNES) {
+            while (jugada == false)
+            {
+                if (j2 < 0 || j2 > COLUMNES - 1)
+                {
                     snprintf(buffer, MIDA_BUFFER, "Generación de aleatorio defectuosa\n");
                     j2 = rand() % 6;
-                } else {
-                    if (fichas[j2] > FILES) {
+                }
+                else
+                {
+                    if (fichas[j2] > FILES)
+                    {
                         snprintf(buffer, MIDA_BUFFER, "Esta columna está completa\n");
                         j2 = rand() % 6;
-                    } else {
+                    }
+                    else
+                    {
                         tablero[fichas[j2]][j2] = 'O';
                         fichas[j2]++;
                         jugada = true;
@@ -125,32 +143,69 @@ int main() {
             jugada = false;
 
             // Envía el estado actual del tablero al cliente
-            fila = FILES;  // Empezamos desde la última fila
-            sprintf(buffer, "\n");
-            while (fila > 0) {
+            fila = FILES; // Empezamos desde la última fila
+            sprintf(buffer + MIDA_BUFFER, "\n");
+            while (fila >= 0)
+            {
                 int columna = 0;
-                while (columna < COLUMNES) {
+                while (columna <= COLUMNES)
+                {
                     // Agregamos el carácter de la casilla al búfer
-                    sprintf(buffer + strlen(buffer), "|%c|", tablero[fila][columna]);
+                    sprintf(buffer + MIDA_BUFFER, "|%c|", tablero[fila][columna]);
                     columna = columna + 1;
                 }
                 // Agregamos una nueva línea al final de la fila
-                sprintf(buffer + strlen(buffer), "\n");
+                sprintf(buffer + MIDA_BUFFER, "\n");
                 fila = fila - 1;
             }
-
             // Enviamos respuesta
-            sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
+            sendto(s, buffer, MIDA_BUFFER + 1, 0, (struct sockaddr *)&client_adr, mida);
 
             columna = 0;
-            while (fichas [columna] == FILES){
+            while (fichas[columna] >= FILES)
+            {
                 columna++;
-                if (columna == COLUMNES - 1) {
+                if (columna >= COLUMNES - 1)
+                {
                     snprintf(buffer, MIDA_BUFFER, "---GAME OVER---\nTABLERO LLENO");
-                    sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
-                } 
+                    fi = true;
+                }
             }
         }
+        else
+        {
+            snprintf(buffer, MIDA_BUFFER, "ENVIA 0 PARA REINICIAR");
+            sendto(s, buffer, MIDA_BUFFER + 1, 0, (struct sockaddr *)&client_adr, mida);
+            mida = sizeof(client_adr);
+            n = recvfrom(s, buffer, MIDA_BUFFER, 0, (struct sockaddr *)&client_adr, &mida);
+
+            if (n < 0)
+            {
+                perror("Error al recibir datos\n");
+                continue;
+            }
+            sscanf(buffer, "%c", &restart);
+            printf("Paquete recibido %s (columna %d)\n", buffer, columna);
+
+            if (restart == 0)
+            {
+                fila = FILES;
+                // Generamos una tabla vacía
+                while (fila >= 0)
+                {
+                    int columna = 0;
+                    while (columna <= COLUMNES)
+                    {
+                        tablero[fila][columna] = '_';
+                        fichas[columna] = 0;
+                        columna = columna + 1;
+                    }
+                    fila = fila - 1;
+                }
+                fi = false;
+            }
+        }
+    }
     /* Cerramos el socket */
     close(s);
     return 0;
