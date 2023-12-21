@@ -12,6 +12,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
+/* Configuramos los datos del socket */
 #define MIDA_BUFFER 1024
 #define FILES 6
 #define COLUMNES 6
@@ -23,6 +24,7 @@ int main() {
     char buffer[MIDA_BUFFER];
     socklen_t mida;
 
+    /* Definimos las variables necesarias para el juego */
     int n;
     int ordre;
     int columna, fila;
@@ -65,6 +67,7 @@ int main() {
             }
             fila = fila - 1;
         }
+        // Indicamos los numeros de las columnas en la parte superior
         columna = 0;
         while (columna < COLUMNES) {
             tablero[FILES][columna] = columna + '0';
@@ -92,6 +95,7 @@ int main() {
                 fi = true;
             }
         }
+        // Verificamos si hay 4 en linea horizontal
         for (fila = 0; fila < FILES; fila++) {
             contadorVictoria = 1;
             for (columna = 0; columna < COLUMNES - 1; columna++) {
@@ -108,6 +112,7 @@ int main() {
                 }
             }
         }
+        // Verificamos si hay 4 en linea vertical
         for (columna = 0; columna < COLUMNES; columna++) {
             contadorVictoria = 1;
             for (fila = 0; fila < FILES - 1; fila++) {
@@ -182,19 +187,7 @@ int main() {
             sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
 
         } else {
-            // Envía el estado actual del tablero al cliente
-            fila = FILES; // Empezamos desde la última fila
-            sprintf(buffer, "\n");
-            while (fila >= 0) {
-                int columna = 0;
-                while (columna < COLUMNES) {
-                    sprintf(buffer + strlen(buffer), "|%c|", tablero[fila][columna]);
-                    columna = columna + 1;
-                }
-                // Agregamos una nueva línea al final de la fila
-                sprintf(buffer + strlen(buffer), "\n");
-                fila = fila - 1;
-            }
+            // Enviamos quien es el ganador
             if (ganador == true) {
                 snprintf(buffer, MIDA_BUFFER, "-JUGADOR 'X' GANA-\n");
                 sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
@@ -203,7 +196,7 @@ int main() {
                 sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
             }
 
-            // Generamos una tabla vacía
+            // Generamos una tabla vacía para una nueva partida
             fila = FILES;
             while (fila >= 0) {
                 columna = 0;
