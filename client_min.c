@@ -26,9 +26,10 @@ int main(int argc, char **argv) {
     struct sockaddr_in adr;
     char buffer[BUFFER_LEN];
     int n;
-    int columna = -1;
+    int ordre = -1;
 
-    while (columna != ORDRE_FI) {
+    printf("Para tirar, introduce numeros del 0 al %d\nPara salir pulse %d\n", COLUMNES - 1, ORDRE_FI);
+    while (ordre != ORDRE_FI) {
         /* Queremos un socket de Internet y no orientado a la conexión */
         s = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -36,12 +37,11 @@ int main(int argc, char **argv) {
         adr.sin_port = htons(44444);
         adr.sin_addr.s_addr = inet_addr(argv[1]);
 
-        // Leer y enviar la columna elegida
-        printf("Elije una columna del 0 al 5, pulsa 9 para terminar\n");
-        scanf("%d", &columna);
+        // Leer y enviar la orden elegida
+        scanf("%d", &ordre);
 
         // Convertir int a cadena y enviar
-        sprintf(buffer, "%d", columna);
+        sprintf(buffer, "%d", ordre);
         sendto(s, buffer, BUFFER_LEN, 0, (struct sockaddr*)&adr, sizeof(adr));
         printf("Paquete enviado! -> %s\n", buffer);
 
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
         printf("Esperando resultado del servidor...\n");
         recvfrom(s, buffer, BUFFER_LEN, 0, NULL, NULL);
 
-        // Mostrar el estado del tablero
+        // Mostrar mensaje del servidor
         printf("%s\n", buffer);
 
         /* Cerrar el socket */
