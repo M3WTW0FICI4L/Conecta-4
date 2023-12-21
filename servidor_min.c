@@ -16,7 +16,6 @@
 #define FILES 6
 #define COLUMNES 6
 #define ORDRE_FI 9
-#define RESTART 0
 
 int main() {
     int s; /* Para trabajar con el socket */
@@ -35,7 +34,7 @@ int main() {
 
     bool jugada = false;
     bool fi = false;
-    bool ganador;
+    bool ganador = false;
 
     columna = 0;
     fila = FILES;
@@ -89,7 +88,9 @@ int main() {
         while (fichas[columna] >= FILES) {
             columna++;
             if (columna >= COLUMNES - 1) {
-                snprintf(buffer, MIDA_BUFFER, "---GAME OVER---\nTABLERO LLENO");
+                snprintf(buffer, MIDA_BUFFER, "-TABLERO LLENO-\n");
+                sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
+                ganador = false;
                 fi = true;
             }
         }
@@ -98,13 +99,9 @@ int main() {
             for (columna = 0; columna < COLUMNES - 1; columna++) {
                 if ((tablero[fila][columna] == tablero[fila][columna+1]) && (tablero[fila][columna] == 'X' || tablero[fila][columna] == 'O')) {
                     contadorVictoria++;
-                    if (tablero[fila][columna] == 'X') {
-                        ganador = true;
-                    } else {
-                        ganador = false;
-                    }
                     if (contadorVictoria >= 4) {
                         fi = true;
+                        ganador = true;
                     }
                 }
             }
@@ -114,13 +111,9 @@ int main() {
             for (fila = 0; fila < FILES - 1; fila++) {
                 if ((tablero[fila][columna] == tablero[fila + 1][columna]) && (tablero[fila][columna] == 'X' || tablero[fila][columna] == 'O')) {
                     contadorVictoria++;
-                    if (tablero[fila][columna] == 'X') {
-                        ganador = true;
-                    } else {
-                        ganador = false;
-                    }
                     if (contadorVictoria >= 4) {
                         fi = true;
+                        ganador = true;
                     }
                 }
             }
@@ -200,10 +193,10 @@ int main() {
                 fila = fila - 1;
             }
             if (ganador = true) {
-                snprintf(buffer, MIDA_BUFFER, "-JUGADOR 'X' GANA-\n");
+                snprintf(buffer, MIDA_BUFFER, "--VICTORY--\n");
                 sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
             } else {
-                snprintf(buffer, MIDA_BUFFER, "-JUGADOR 'O' GANA-\n");
+                snprintf(buffer, MIDA_BUFFER, "-GAME OVER-\n");
                 sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
             }
 
