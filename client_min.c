@@ -14,6 +14,7 @@
 #define BUFFER_LEN 1024
 #define COLUMNES 6
 #define FILES 6
+#define ORDRE_FI 9
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -27,7 +28,7 @@ int main(int argc, char **argv) {
     int n;
     int columna = -1;
 
-    while (columna != 9) {
+    while (columna != ORDRE_FI) {
         /* Queremos un socket de Internet y no orientado a la conexión */
         s = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -50,9 +51,9 @@ int main(int argc, char **argv) {
 
         // Mostrar el estado del tablero
         printf("%s\n", buffer);
-    }
-    /* Cerrar el socket */
+
+        /* Cerrar el socket */
         close(s);
-    
+    }
     return 0;
 }
