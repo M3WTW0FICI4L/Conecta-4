@@ -147,13 +147,13 @@ int main() {
 
             while (jugada == false) {
                 // Genera un número aleatorio entre 0 y 5 (ambos incluidos)
-                j2 = rand() % 6;
+                j2 = rand() % (COLUMNES -1);
                 if (j2 < 0 || j2 > COLUMNES - 1) {
-                    j2 = rand() % 6;
+                    j2 = rand() % (COLUMNES -1);
                 }
                 else {
                     if (fichas[j2] >= FILES) {
-                        j2 = rand() % 6;
+                        j2 = rand() % (COLUMNES -1);
                     } else {
                         tablero[fichas[j2]][j2] = 'O';
                         fichas[j2]++;
@@ -179,19 +179,6 @@ int main() {
             sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
 
         } else {
-            // Envía el estado actual del tablero al cliente
-            fila = FILES; // Empezamos desde la última fila
-            sprintf(buffer, "\n");
-            while (fila >= 0) {
-                int columna = 0;
-                while (columna < COLUMNES) {
-                    sprintf(buffer + strlen(buffer), "|%c|", tablero[fila][columna]);
-                    columna = columna + 1;
-                }
-                // Agregamos una nueva línea al final de la fila
-                sprintf(buffer + strlen(buffer), "\n"); 
-                fila = fila - 1;
-            }
             if (ganador = true) {
                 snprintf(buffer, MIDA_BUFFER, "--VICTORY--\n");
                 sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
