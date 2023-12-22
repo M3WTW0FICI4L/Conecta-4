@@ -179,7 +179,7 @@ int main() {
             sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
 
         } else {
-            if (ganador = true) {
+            if (ganador == true) {
                 snprintf(buffer, MIDA_BUFFER, "--VICTORY--\n");
                 sendto(s, buffer, strlen(buffer) + 1, 0, (struct sockaddr *)&client_adr, mida);
             } else {
